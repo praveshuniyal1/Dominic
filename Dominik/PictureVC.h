@@ -10,7 +10,9 @@
 
 @interface PictureVC : UIViewController
 
-
+{
+    NSInteger CountVar;
+}
 
 - (IBAction)logoutAction:(id)sender;
 

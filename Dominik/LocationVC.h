@@ -7,11 +7,26 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <MapKit/MapKit.h>
+#import <CoreLocation/CoreLocation.h>
 
-@interface LocationVC : UIViewController
+@interface LocationVC : UIViewController<MKMapViewDelegate,CLLocationManagerDelegate,UITableViewDataSource,UITableViewDelegate,UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate>
+{
+    
+    IBOutlet UISearchBar *search_Bar;
+    IBOutlet UITableView *tblLocation;
+    IBOutlet UITableView *tblSearch;
+    
+    
+    IBOutlet UIButton *btnAction;
+   
+}
 
 
+- (IBAction)AddAction:(id)sender;
 
+
+@property (nonatomic, strong) IBOutlet MKMapView *mapView;
 
 - (IBAction)logoutAction:(id)sender;
 

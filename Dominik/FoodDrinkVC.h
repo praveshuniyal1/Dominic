@@ -8,10 +8,19 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FoodDrinkVC : UIViewController
+@interface FoodDrinkVC : UIViewController<UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate,UITableViewDataSource,UITableViewDelegate>
+{
+    
+    IBOutlet UISearchBar *searchBar;
+    
+    
+    IBOutlet UITableView *foodTable;
+}
 
 
 - (IBAction)logoutAction:(id)sender;
 
 - (IBAction)backbtnAction:(id)sender;
+- (IBAction)addAction:(id)sender;
+
 @end

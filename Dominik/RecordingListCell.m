@@ -9,6 +9,8 @@
 #import "RecordingListCell.h"
 
 @implementation RecordingListCell
+@synthesize lblDate,lblDetail,lblRecordName;
+
 
 - (void)awakeFromNib {
     // Initialization code

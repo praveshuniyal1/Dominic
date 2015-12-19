@@ -9,16 +9,51 @@
 #import "RecordingListVC.h"
 #import "RecordingListCell.h"
 #import "RecordingsVC.h"
+#import "FMDatabase.h"
 
 @interface RecordingListVC ()
+{
+    NSString *recordPath;
+    FMDatabase *database;
+    NSString *userId;
+    NSString *selectDate;
+    NSMutableArray *recordArr;
+    NSString *path;
+   
+}
 
 @end
 
 @implementation RecordingListVC
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    
+    recordArr=[[NSMutableArray alloc]init];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docsPath = [paths objectAtIndex:0];
+    path = [docsPath stringByAppendingPathComponent:@"database.sqlite"];
+    database = [FMDatabase databaseWithPath:path];
+    [database open];
+   
+
+}
+-(void)viewWillAppear:(BOOL)animated
+{
+    recordArr=[NSMutableArray new];
+    userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
+    selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
+    
+    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM recordTbl where user_id='%@' and date='%@'",userId,selectDate];
+    FMResultSet *recordResults = [database executeQuery:sql];
+    
+    while([recordResults next])
+    {
+        [recordArr addObject:[recordResults resultDictionary]];
+    }
+    [recordResults close];
+
 }
 
 - (void)didReceiveMemoryWarning {
@@ -44,7 +79,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
-    return 1;    //count number of row from counting array hear cataGorry is An Array
+    return recordArr.count;    //count number of row from counting array hear cataGorry is An Array
 }
 
 
@@ -61,11 +96,16 @@
                                       reuseIdentifier:MyIdentifier];
     }
     
+    cell.lblRecordName.text=[[recordArr valueForKey:@"recordTitle"]objectAtIndex:indexPath.row];
+    cell.lblDate.text=[[recordArr valueForKey:@"date"]objectAtIndex:indexPath.row];
+    cell.lblDetail.text=[[recordArr valueForKey:@"recordName"]objectAtIndex:indexPath.row];
+    
     return cell;
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     RecordingsVC *recordingView = [self.storyboard instantiateViewControllerWithIdentifier:@"RecordingsVC"];
+    recordingView.recordDic=[recordArr objectAtIndex:indexPath.row];
     [self.navigationController pushViewController:recordingView animated:YES];
     }
 

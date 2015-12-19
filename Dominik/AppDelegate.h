@@ -14,7 +14,7 @@
 
 
 #define KappDelgate ((AppDelegate *)[[UIApplication sharedApplication] delegate])
-
+#define KGoogleApiKey    @"AIzaSyAfJkNHU5FU_huXyeWksd2-xPgQNppm6dk"
 @interface AppDelegate : UIResponder <UIApplicationDelegate,UITabBarControllerDelegate>
 {
     UIStoryboard *storyboard;
@@ -36,6 +36,13 @@
 -(void)makeClenderAsRootView;
 -(void)logout;
 -(void)showAlertView:(NSString*)title with:(NSString*)message;
+
+
+//DatabaseWorking
+
+-(void)initialiseDataBase;
+-(void)createTable:(NSString*)createquery;
+
 
 @end
 

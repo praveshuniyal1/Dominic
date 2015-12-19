@@ -25,6 +25,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *docsPath = [paths objectAtIndex:0];
     path = [docsPath stringByAppendingPathComponent:@"database.sqlite"];
@@ -32,16 +33,7 @@
     database = [FMDatabase databaseWithPath:path];
     [database open];
     
-    /*
-    
-    FMResultSet *results = [database executeQuery:@"select * from user"];
-    while([results next]) {
-        NSString *name = [results stringForColumn:@"name"];
-        NSInteger age  = [results intForColumn:@"age"];
-        NSLog(@"User: %@ - %ld",name, age);
-    }
-    [database close];
-    */
+
    
 }
 -(void)viewWillAppear:(BOOL)animated
@@ -75,17 +67,20 @@
      
         database = [FMDatabase databaseWithPath:path];
         [database open];
-        [database executeUpdate:@"create table UserPassword(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,name text)"];
+        [database executeUpdate:@"create table UserPassword(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,name text,password text)"];
         
         
         NSString *searchString = txt_userName.text;
         NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
-        NSString *sql = @"SELECT name FROM UserPassword WHERE name LIKE ?";
+        NSString *sql = @"SELECT * FROM UserPassword WHERE name LIKE ?";
         
-        FMResultSet *name = [database executeQuery:sql, likeParameter];
+        FMResultSet *Results = [database executeQuery:sql, likeParameter];
         
-        if ([name next])
+        if ([Results next])
         {
+            NSLog(@"%@-%@-%@",[Results stringForColumn:@"name"],[Results stringForColumn:@"password"],[Results stringForColumn:@"id"]);
+            [[NSUserDefaults standardUserDefaults]setObject:[Results stringForColumn:@"id"] forKey:@"user_id"];
+
             CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
             [self.navigationController pushViewController:calenderView animated:YES];
             [database close];
@@ -98,27 +93,28 @@
             [database executeUpdate:query];
             
             
-            NSString *searchString = txt_userName.text;
-            NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
-            NSString *sql = @"SELECT name FROM UserPassword WHERE name LIKE ?";
+            FMResultSet *results = [database executeQuery:@"SELECT * FROM UserPassword WHERE name LIKE ?",txt_userName.text];
             
-            FMResultSet *results = [database executeQuery:sql, likeParameter];
-
-            while([results next])
+            if ([results next])
             {
-                NSString *name = [results stringForColumn:@"name"];
-                NSInteger ID  = [results intForColumn:@"id"];
-                NSLog(@"User: %@ - %ld",name, ID);
+                NSLog(@"%@-%@-%@",[results stringForColumn:@"name"],[results stringForColumn:@"password"],[results stringForColumn:@"id"]);
+                [[NSUserDefaults standardUserDefaults]setObject:[results stringForColumn:@"id"] forKey:@"user_id"];
                 
                 
                 CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
                 [self.navigationController pushViewController:calenderView animated:YES];
+                
+                NSLog(@"matched");
+            } else
+            {
+                NSLog(@"not matched");
             }
+            
             [database close];
             [results close];
         }
         
-        [name close];
+        [Results close];
         
        
     }

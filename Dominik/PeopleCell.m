@@ -9,6 +9,7 @@
 #import "PeopleCell.h"
 
 @implementation PeopleCell
+@synthesize lblName,btnImage;
 
 - (void)awakeFromNib {
     // Initialization code

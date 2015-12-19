@@ -8,7 +8,10 @@
 
 #import "FurtherQuestionCell.h"
 
+
 @implementation FurtherQuestionCell
+@synthesize lblAntrieb,lblBodyWt,lblMood,lblSleep,lblStress;
+@synthesize sliderAntrieb,sliderBOdyWt,sliderMood,sliderSleep,sliderStress,lblDate,lblPainLavel;
 
 - (void)awakeFromNib {
     // Initialization code

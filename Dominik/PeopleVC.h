@@ -7,8 +7,20 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AddressBook/AddressBook.h>
+#import <AddressBookUI/AddressBookUI.h>
 
-@interface PeopleVC : UIViewController
+
+@interface PeopleVC : UIViewController<UISearchDisplayDelegate,UISearchBarDelegate,UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate>
+{
+    NSMutableArray *main_contact_Array;
+   
+    IBOutlet UISearchBar *search_Bar;
+    IBOutlet UITableView *tblPeople;
+    IBOutlet UITableView *tblContect;
+    
+    
+}
 
 
 

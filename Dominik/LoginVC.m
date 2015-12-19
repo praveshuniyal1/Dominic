@@ -43,9 +43,7 @@
 }
 - (IBAction)doneAction:(id)sender
 {
-//    CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
-//    [self.navigationController pushViewController:calenderView animated:YES];
-    
+
     
     database = [FMDatabase databaseWithPath:path];
     [database open];
@@ -62,7 +60,7 @@
     {
         
         NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
-        NSString *sql = @"SELECT password FROM UserPassword WHERE name LIKE ?";
+        NSString *sql = @"SELECT * FROM UserPassword WHERE name LIKE ?";
         
         FMResultSet *passwords = [database executeQuery:sql, likeParameter];
         if ([passwords next])
@@ -70,6 +68,9 @@
              NSString *password  = [passwords stringForColumn:@"password"];
             if ([password isEqualToString:txt_password.text])
             {
+//                NSLog(@"%@-%@-%@",[passwords stringForColumn:@"name"],[passwords stringForColumn:@"password"],[passwords stringForColumn:@"id"]);
+//                [[NSUserDefaults standardUserDefaults]setObject:[passwords stringForColumn:@"id"] forKey:@"user_id"];
+                
                 CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
                 [self.navigationController pushViewController:calenderView animated:YES];
                 [database close];
@@ -91,7 +92,7 @@
     
     else
     {
-    
+        [database open];
         NSString *query = [NSString stringWithFormat:@"insert into UserPassword(name,password) values ('%@','%@')",
                            txt_userName.text,txt_password.text];
         [database executeUpdate:query];
@@ -101,9 +102,9 @@
         
         if ([results next])
         {
-            NSString *name = [results stringForColumn:@"name"];
-            NSString *password  = [results stringForColumn:@"password"];
-            NSLog(@"%@-%@",name,password);
+            NSLog(@"%@-%@-%@",[results stringForColumn:@"name"],[results stringForColumn:@"password"],[results stringForColumn:@"id"]);
+            [[NSUserDefaults standardUserDefaults]setObject:[results stringForColumn:@"id"] forKey:@"user_id"];
+
             
             CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
             [self.navigationController pushViewController:calenderView animated:YES];

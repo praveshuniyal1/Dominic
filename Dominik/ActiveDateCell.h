@@ -7,12 +7,21 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "NIDropDown.h"
 
-@interface ActiveDateCell : UITableViewCell
+@interface ActiveDateCell : UITableViewCell<NIDropDownDelegate>
 {
     
-    
+   
+   
 }
-@property(strong,nonatomic)IBOutlet UILabel *lblSymptomes;
 
+@property (retain, nonatomic) IBOutlet UIButton *btnSelect1;
+
+
+@property(strong,nonatomic)IBOutlet UILabel *lblSymptomes;
+@property (strong, nonatomic) IBOutlet UIButton *btnSelect;
+@property (strong, nonatomic) IBOutlet UIButton *imageSymptom;
+
+- (IBAction)selectClicked:(id)sender;
 @end

@@ -10,4 +10,11 @@
 
 @interface LocationCell : UITableViewCell
 
+
+@property (strong, nonatomic) IBOutlet UILabel *lblLocation;
+
+@property (strong, nonatomic) IBOutlet UIButton *lblImage;
+
+
+
 @end

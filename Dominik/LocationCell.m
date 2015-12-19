@@ -9,7 +9,7 @@
 #import "LocationCell.h"
 
 @implementation LocationCell
-
+@synthesize lblImage,lblLocation;
 - (void)awakeFromNib {
     // Initialization code
 }

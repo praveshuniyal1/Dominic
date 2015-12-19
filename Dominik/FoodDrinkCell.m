@@ -9,6 +9,7 @@
 #import "FoodDrinkCell.h"
 
 @implementation FoodDrinkCell
+@synthesize lblFood,foodImage;
 
 - (void)awakeFromNib {
     // Initialization code

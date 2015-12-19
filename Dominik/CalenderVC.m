@@ -45,12 +45,14 @@
 -(void)LGCalendar:(LGCalendar *)calendar didSelectDate:(NSDate *)selectDate
 {
     NSLog(@"select date:%@", selectDate);
+    
     id object=selectDate;
     if (object)
     {
         
             DetailVC *detailView = [self.storyboard instantiateViewControllerWithIdentifier:@"Detail"];
             [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:selectDate] forKey:@"selectDate"];
+            [[NSUserDefaults standardUserDefaults]setObject:selectDate forKey:@"dafault_selectDate"];
             [self.navigationController pushViewController:detailView animated:YES];
     }
 
@@ -59,7 +61,6 @@
 
 -(NSString *)getDateFromString:(NSDate *)string
 {
-    
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"ddMMM,yyyy"];
     NSString *stringFromDate = [formatter stringFromDate:string];

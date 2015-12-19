@@ -9,17 +9,53 @@
 #import "FurtherQuestionVC.h"
 #import "FurtherQuestionCell.h"
 #import "AppDelegate.h"
+#import "FMDatabase.h"
 
 
 @interface FurtherQuestionVC ()
+{
+    
+    NSString *path;
+    FMDatabase *database;
+    NSString *userId;
+    NSString *selectDate;
+    NSMutableArray *questionArr;
+    
+}
 
 @end
 
 @implementation FurtherQuestionVC
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    
+    questionArr=[[NSMutableArray alloc]init];;
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docsPath = [paths objectAtIndex:0];
+    path = [docsPath stringByAppendingPathComponent:@"database.sqlite"];
+    database = [FMDatabase databaseWithPath:path];
+    [database open];
+    
+
+}
+-(void)viewWillAppear:(BOOL)animated
+{
+    userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
+    selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
+    
+    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM questionTbl where user_id='%@'",userId];
+    FMResultSet *results = [database executeQuery:sql];
+    
+    while ([results next])
+    {
+        [questionArr addObject:[results resultDictionary]];
+    }
+    [database close];
+    [results close];
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -43,9 +79,10 @@
 }
 
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
     
-    return 1;    //count number of row from counting array hear cataGorry is An Array
+    return questionArr.count;
 }
 
 
@@ -53,7 +90,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *MyIdentifier = @"FurtherQuestion";
+    static NSString *MyIdentifier = @"FurtherQuestionCell";
     FurtherQuestionCell *cell = [tableView dequeueReusableCellWithIdentifier:MyIdentifier];
     
     if (cell == nil)
@@ -61,6 +98,21 @@
         cell = [[FurtherQuestionCell alloc] initWithStyle:UITableViewCellStyleDefault
                                      reuseIdentifier:MyIdentifier];
     }
+    
+    
+    cell.sliderStress.value=[[[questionArr valueForKey:@"stress"] objectAtIndex:indexPath.row] floatValue];
+    cell.sliderSleep.value=[[[questionArr valueForKey:@"howLong"] objectAtIndex:indexPath.row] floatValue];
+    cell.sliderMood.value=[[[questionArr valueForKey:@"mood"] objectAtIndex:indexPath.row]floatValue];
+    cell.sliderBOdyWt.value=[[[questionArr valueForKey:@"bodyWeight"] objectAtIndex:indexPath.row]floatValue];
+    cell.sliderAntrieb.value=[[[questionArr valueForKey:@"antrieb"] objectAtIndex:indexPath.row]floatValue];
+    
+    cell.lblStress.text=[NSString stringWithFormat:@"%@ Lavel",[[questionArr valueForKey:@"stress"] objectAtIndex:indexPath.row]];
+     cell.lblSleep.text=[NSString stringWithFormat:@"%@ Lavel",[[questionArr valueForKey:@"howLong"] objectAtIndex:indexPath.row]];
+     cell.lblMood.text=[NSString stringWithFormat:@"%@ Lavel",[[questionArr valueForKey:@"mood"] objectAtIndex:indexPath.row]];
+     cell.lblBodyWt.text=[NSString stringWithFormat:@"%@ Lavel",[[questionArr valueForKey:@"bodyWeight"] objectAtIndex:indexPath.row]];
+    cell.lblAntrieb.text=[NSString stringWithFormat:@"%@ Lavel",[[questionArr valueForKey:@"antrieb"] objectAtIndex:indexPath.row]];
+    cell.lblDate.text=[[questionArr valueForKey:@"date"] objectAtIndex:indexPath.row];
+    
     
     return cell;
 }

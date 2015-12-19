@@ -9,5 +9,13 @@
 #import <UIKit/UIKit.h>
 
 @interface SymptomListCell : UITableViewCell
+{
+    
+    
+}
+
+@property (strong, nonatomic) IBOutlet UILabel *lblSymptom;
+@property (strong, nonatomic) IBOutlet UIButton *imageSymptom;
+
 
 @end

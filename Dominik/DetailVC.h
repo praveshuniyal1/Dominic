@@ -28,7 +28,8 @@
     
 }
 
-
+- (IBAction)nextDate:(id)sender;
+- (IBAction)previousDate:(id)sender;
 - (IBAction)symptomesAction:(id)sender;
 - (IBAction)foodDrinkAction:(id)sender;
 - (IBAction)locationAction:(id)sender;

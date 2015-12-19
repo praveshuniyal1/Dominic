@@ -10,6 +10,7 @@
 #import "ViewController.h"
 #import "CalenderVC.h"
 #import "FMDatabase.h"
+#import "LocationManager.h"
 
 
 
@@ -19,6 +20,9 @@
 {
     NSMutableArray *tabbar_array;
     UINavigationController *navigation_app_delegate;
+    NSString *path;
+    FMDatabase *database;
+
 
 }
 @end
@@ -32,7 +36,7 @@
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
-    
+    [[LocationManager locationInstance]getcurrentLocation];
     tabbar_array=[[NSMutableArray alloc]init];
     tabbar_controller=[[UITabBarController alloc]init];
    
@@ -62,32 +66,26 @@
        NSFontAttributeName: [UIFont fontWithName:@"HelveticaNeue-Bold" size:10.0f]
        } forState:UIControlStateSelected];
     
-////////////////////////////////////////////////////////////////////////
-    //database implementation
-    
-//    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-//    NSString *docsPath = [paths objectAtIndex:0];
-//    NSString *path = [docsPath stringByAppendingPathComponent:@"newdatabase.sqlite"];
-//    
-//    FMDatabase *database = [FMDatabase databaseWithPath:path];
-//
-//    [database open];
-//    [database executeUpdate:@"create table user(name text primary key, age int)"];
-//    NSString *query = [NSString stringWithFormat:@"insert into user values ('%@', %d)",
-//                       @"Amit", 25];
-//    [database executeUpdate:query];
-//    
-//    
-//    FMResultSet *results = [database executeQuery:@"select * from user"];
-//    while([results next]) {
-//        NSString *name = [results stringForColumn:@"name"];
-//        NSInteger age  = [results intForColumn:@"age"];
-//        NSLog(@"User: %@ - %ld",name, age);
-//    }
-//    [database close];
     
     return YES;
 }
+#pragma DataBase working
+-(void)initialiseDataBase
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docsPath = [paths objectAtIndex:0];
+    path = [docsPath stringByAppendingPathComponent:@"database.sqlite"];
+    database = [FMDatabase databaseWithPath:path];
+    [database open];
+}
+-(void)createTable:(NSString*)createquery
+{
+    database = [FMDatabase databaseWithPath:path];
+    [database open];
+    [database executeUpdate:createquery];//@"create table UserPassword(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,name text,password text)"
+}
+
+#pragma other working
 -(void)makeRootView
 {
     [tabbar_controller.tabBar setBackgroundImage:[UIImage imageNamed:@"Rectangle-2"]];
@@ -122,7 +120,7 @@
     ViewControllerObj = [storyboard instantiateViewControllerWithIdentifier:@"Detail"];
     FirstViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"ActionPlanVC"];
     SecondViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"ControlVC"];
-    ThirdViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"WetherVC"];
+    ThirdViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"SymptomList"];
    
     
     

@@ -14,9 +14,17 @@
 #import "AppDelegate.h"
 #import "ActiveDate.h"
 #import "FurtherQuestionVC.h"
+#import "FMDatabase.h"
+#import "QuestionFurtherVC.h"
 
 
 @interface DetailVC ()
+{
+    NSMutableArray *foodArr;
+    NSString *path;
+    FMDatabase *database;
+
+}
 
 @end
 
@@ -29,48 +37,158 @@
     [super viewDidLoad];
      [KappDelgate makeRootView];
     
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docsPath = [paths objectAtIndex:0];
+    path = [docsPath stringByAppendingPathComponent:@"database.sqlite"];
+    database = [FMDatabase databaseWithPath:path];
+    [database open];
+    
 }
 -(void)viewWillAppear:(BOOL)animated
 {
+    
+    NSString *userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
+    NSString *selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
+    
      lblDate.text=[NSString stringWithFormat:@"%@",[[NSUserDefaults standardUserDefaults]valueForKey:@"selectDate"]];
     
-    if (btnSymptomes.isSelected==YES)
+    
+    NSString *sqlsym = [NSString stringWithFormat:@"SELECT * FROM SymptomTable WHERE user_id='%@' AND date='%@'",userId,selectDate];
+    FMResultSet *symResults = [database executeQuery:sqlsym];
+    if([symResults next])
     {
-        lblSymptomes.textColor=[UIColor colorWithRed:(109.0/255.0) green:(161.0/255.0) blue:(63.0/255.0) alpha:1];
+        btnSymptomes.selected=YES;
+       lblSymptomes.textColor=[UIColor colorWithRed:(109.0/255.0) green:(161.0/255.0) blue:(63.0/255.0) alpha:1];
     }
     else{
+        btnSymptomes.selected=NO;
         lblSymptomes.textColor=[UIColor grayColor];
     }
+       [symResults close];
+
     
-    if (btnFoodAndDrink.isSelected==YES)
+    NSString *sql = [NSString stringWithFormat:@"SELECT foodName FROM AddFoodTbl where user_id='%@' and date='%@'",userId,selectDate];
+    FMResultSet *foodResults = [database executeQuery:sql];
+   
+    if ([foodResults next])
     {
+        btnFoodAndDrink.selected=YES;
         lblFoodDrink.textColor=[UIColor colorWithRed:(109.0/255.0) green:(161.0/255.0) blue:(63.0/255.0) alpha:1];
     }
     else{
+        btnFoodAndDrink.selected=NO;
         lblFoodDrink.textColor=[UIColor grayColor];
     }
-    if (btnLOcation.isSelected==YES)
+    [foodResults close];
+    
+    
+    NSString *sqlPeople = [NSString stringWithFormat:@"SELECT peopleName FROM peopleTbl where user_id='%@' and date='%@'",userId,selectDate];
+    FMResultSet *peopleResults = [database executeQuery:sqlPeople];
+    
+    if ([peopleResults next])
     {
-        lblLocation.textColor=[UIColor colorWithRed:(109.0/255.0) green:(161.0/255.0) blue:(63.0/255.0) alpha:1];
-    }
-    else{
-        lblLocation.textColor=[UIColor grayColor];
-    }
-    if (btnPeople.isSelected==YES)
-    {
+        btnPeople.selected=YES;
         lblPeople.textColor=[UIColor colorWithRed:(109.0/255.0) green:(161.0/255.0) blue:(63.0/255.0) alpha:1];
     }
     else{
+        btnPeople.selected=NO;
         lblPeople.textColor=[UIColor grayColor];
     }
-    if (btnQuestion.isSelected==YES)
+    [peopleResults close];
+    
+    
+    NSString *sqlLocation = [NSString stringWithFormat:@"SELECT locationName FROM locationTbl where user_id='%@' and date='%@'",userId,selectDate];
+    FMResultSet *locationResults = [database executeQuery:sqlLocation];
+    
+    if ([locationResults next])
     {
+        btnLOcation.selected=YES;
+        lblLocation.textColor=[UIColor colorWithRed:(109.0/255.0) green:(161.0/255.0) blue:(63.0/255.0) alpha:1];
+    }
+    else{
+        btnLOcation.selected=NO;
+        lblLocation.textColor=[UIColor grayColor];
+    }
+    [locationResults close];
+    
+    NSString *sqlQuestion = [NSString stringWithFormat:@"SELECT * FROM questionTbl where user_id='%@' and date='%@'",userId,selectDate];
+    FMResultSet *QuestionResults = [database executeQuery:sqlQuestion];
+    
+    if ([QuestionResults next])
+    {
+        btnQuestion.selected=YES;
         lblQuestion.textColor=[UIColor colorWithRed:(109.0/255.0) green:(161.0/255.0) blue:(63.0/255.0) alpha:1];
     }
     else{
+        btnQuestion.selected=NO;
         lblQuestion.textColor=[UIColor grayColor];
     }
+    [QuestionResults close];
 
+
+  
+}
+
+- (IBAction)nextDate:(id)sender
+{
+    NSDate *currentDate=[[NSUserDefaults standardUserDefaults]valueForKey:@"dafault_selectDate"];
+    
+    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *todayComponents = [gregorian components:(NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit) fromDate:currentDate];
+    NSInteger theDay = [todayComponents day];
+    NSInteger theMonth = [todayComponents month];
+    NSInteger theYear = [todayComponents year];
+    
+    
+    NSDateComponents *components = [[NSDateComponents alloc] init];
+    [components setDay:theDay];
+    [components setMonth:theMonth];
+    [components setYear:theYear];
+    NSDate *thisDate = [gregorian dateFromComponents:components];
+    
+    NSDateComponents *offsetComponents = [[NSDateComponents alloc] init];
+    [offsetComponents setDay:1];
+    NSDate *nextDate = [gregorian dateByAddingComponents:offsetComponents toDate:currentDate options:0];
+    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
+    [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
+    lblDate.text=[self getDateFromString:nextDate];
+    [self viewWillAppear:YES];
+}
+
+- (IBAction)previousDate:(id)sender
+{
+    NSDate *currentDate=[[NSUserDefaults standardUserDefaults]valueForKey:@"dafault_selectDate"];
+    
+    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *todayComponents = [gregorian components:(NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit) fromDate:currentDate];
+    NSInteger theDay = [todayComponents day];
+    NSInteger theMonth = [todayComponents month];
+    NSInteger theYear = [todayComponents year];
+    
+    
+    NSDateComponents *components = [[NSDateComponents alloc] init];
+    [components setDay:theDay];
+    [components setMonth:theMonth];
+    [components setYear:theYear];
+    NSDate *thisDate = [gregorian dateFromComponents:components];
+    
+    NSDateComponents *offsetComponents = [[NSDateComponents alloc] init];
+    [offsetComponents setDay:-1];
+    NSDate *nextDate = [gregorian dateByAddingComponents:offsetComponents toDate:currentDate options:0];
+    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
+    [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
+    lblDate.text=[self getDateFromString:nextDate];
+    [self viewWillAppear:YES];
+    
+}
+-(NSString *)getDateFromString:(NSDate *)string
+{
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"ddMMM,yyyy"];
+    NSString *stringFromDate = [formatter stringFromDate:string];
+    
+    NSLog(@"%@", stringFromDate);
+    return stringFromDate;
 }
 
 
@@ -123,7 +241,7 @@
     [btnQuestion setSelected:YES];
     
     lblQuestion.textColor=[UIColor colorWithRed:(109.0/255.0) green:(161.0/255.0) blue:(63.0/255.0) alpha:1];
-    FurtherQuestionVC *furtherView = [self.storyboard instantiateViewControllerWithIdentifier:@"FurtherQuestionVC"];
+    QuestionFurtherVC *furtherView = [self.storyboard instantiateViewControllerWithIdentifier:@"QuestionFurtherVC"];
     [self.navigationController pushViewController:furtherView animated:YES];
 
 }

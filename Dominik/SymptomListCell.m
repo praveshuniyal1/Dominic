@@ -9,7 +9,7 @@
 #import "SymptomListCell.h"
 
 @implementation SymptomListCell
-
+@synthesize lblSymptom,imageSymptom;
 - (void)awakeFromNib {
     // Initialization code
 }

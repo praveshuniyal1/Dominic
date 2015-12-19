@@ -8,7 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SymptomList : UIViewController
+@interface SymptomList : UIViewController<UIAlertViewDelegate>
+{
+    
+    IBOutlet UITableView *symptomTable;
+    
+    IBOutlet UITableView *graphTable;
+    
+}
 
 
 

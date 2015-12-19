@@ -9,7 +9,11 @@
 #import "ActiveDateCell.h"
 
 @implementation ActiveDateCell
-@synthesize lblSymptomes;
+{
+    NSMutableArray *arrselect;
+}
+@synthesize lblSymptomes,btnSelect,imageSymptom;
+
 - (void)awakeFromNib {
     // Initialization code
 }
@@ -19,5 +23,4 @@
 
     // Configure the view for the selected state
 }
-
 @end

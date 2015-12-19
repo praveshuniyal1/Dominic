@@ -9,6 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface LocationDetailVC : UIViewController
+{
+    
+    IBOutlet UITableView *locationTable;
+}
 
 
 - (IBAction)logoutAction:(id)sender;

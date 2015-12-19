@@ -9,5 +9,14 @@
 #import <UIKit/UIKit.h>
 
 @interface FoodDrinkCell : UITableViewCell
+{
+    
+    
+}
+
+@property (strong, nonatomic) IBOutlet UILabel *lblFood;
+
+@property (strong, nonatomic) IBOutlet UIButton *foodImage;
+
 
 @end

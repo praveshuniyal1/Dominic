@@ -9,31 +9,68 @@
 #import "RecordingsVC.h"
 #import "AppDelegate.h"
 
+#define DOCUMENTS_FOLDER [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"]
+
 @interface RecordingsVC ()
+{
+    NSMutableDictionary*  recordSetting ;
+    NSMutableDictionary*  editedObject ;
+    NSString* recorderFilePath;
+    AVAudioRecorder* recorder ;
+    AVAudioPlayer *audioPlayerl;
+    NSString *userId;
+    NSString *selectDate;
+}
 
 @end
 
 @implementation RecordingsVC
+@synthesize recordDic;
+@synthesize recorder,recorderSettings,recorderFilePath;
+@synthesize audioPlayer,audioFileName;
 
-- (void)viewDidLoad {
+
+- (void)viewDidLoad
+{
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
+    selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
 }
 
-- (void)didReceiveMemoryWarning {
+- (void)didReceiveMemoryWarning
+{
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (IBAction)startPlaying:(id)sender
+{
+    if (btnStartStop.isSelected==NO)
+    {
+        NSLog(@"playRecording");
+        
+        AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+        [audioSession setCategory:AVAudioSessionCategoryPlayback error:nil];
+        
+        NSURL *url = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", DOCUMENTS_FOLDER, [recordDic valueForKey:@"recordName"]]];
+        NSError *error;
+        audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
+        audioPlayer.numberOfLoops = 0;
+        [audioPlayer play];
+        NSLog(@"playing");
+        btnStartStop.alpha=0.5;
+        [btnStartStop setSelected:YES];
+    }
+    else if (btnStartStop.isSelected==YES)
+    {
+        btnStartStop.alpha=1;
+        [btnStartStop setSelected:NO];
+        [audioPlayer stop];
+        NSLog(@"stopped");
+    }
+    
 }
-*/
+
 
 - (IBAction)backBtnAction:(id)sender
 {

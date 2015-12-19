@@ -9,7 +9,7 @@
 #import "RecordCell.h"
 
 @implementation RecordCell
-
+@synthesize lblRecordName,lblTime;
 - (void)awakeFromNib {
     // Initialization code
 }

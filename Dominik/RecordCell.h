@@ -10,4 +10,10 @@
 
 @interface RecordCell : UITableViewCell
 
+@property (strong, nonatomic) IBOutlet UILabel *lblRecordName;
+
+@property (strong, nonatomic) IBOutlet UILabel *lblTime;
+
+
+
 @end
