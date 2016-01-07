@@ -1,17 +1,15 @@
 //
-//  WetherCell.m
+//  WhatsPlanCell.m
 //  Dominik
 //
-//  Created by amit varma on 04/11/15.
+//  Created by amit varma on 23/12/15.
 //  Copyright © 2015 trigma. All rights reserved.
 //
 
-#import "WetherCell.h"
+#import "WhatsPlanCell.h"
 
-@implementation WetherCell
-@synthesize lblAftTemp,lblEveTemp,lblMorTemp;
-@synthesize imgAft,imgEve,imgMor;
-
+@implementation WhatsPlanCell
+@synthesize infoBtn,lblMedicine,ActiveSwitch;
 
 - (void)awakeFromNib {
     // Initialization code

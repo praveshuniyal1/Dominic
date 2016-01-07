@@ -12,7 +12,7 @@
 #import "NIDropDown.h"
 
 
-@interface ActiveDate : UIViewController<UITableViewDataSource,UITableViewDelegate,NIDropDownDelegate>
+@interface ActiveDate : UIViewController<UITableViewDataSource,UITableViewDelegate,NIDropDownDelegate,UIGestureRecognizerDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 {
     IBOutlet UITableView *symptomTable;
     IBOutlet UILabel *lblDate;

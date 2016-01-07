@@ -100,7 +100,15 @@
 
 -(void)setXLabels:(NSArray *)xLabels
 {
-    _xLabels = xLabels;
+    if (xLabels.count==1)
+    {
+        xLabels=  [xLabels objectAtIndex:0];
+        _xLabels=xLabels;
+    }
+    else{
+        _xLabels = xLabels;
+    }
+    
     CGFloat num = 0;
     if (xLabels.count>=20) {
         num=20.0;

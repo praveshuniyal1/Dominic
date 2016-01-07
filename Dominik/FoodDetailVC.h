@@ -13,7 +13,8 @@
     
     IBOutlet UITableView *foodTable;
     
-    
+    NSInteger anIndex;
+    BOOL isScrolled;
 }
 
 @property(strong,nonatomic)NSString* date;

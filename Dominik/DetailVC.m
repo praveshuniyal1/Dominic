@@ -23,6 +23,7 @@
     NSMutableArray *foodArr;
     NSString *path;
     FMDatabase *database;
+    NSString *currentDate;
 
 }
 
@@ -49,6 +50,7 @@
     
     NSString *userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
     NSString *selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
+    currentDate=[[NSUserDefaults standardUserDefaults]valueForKey:@"CurrentDate"];
     
      lblDate.text=[NSString stringWithFormat:@"%@",[[NSUserDefaults standardUserDefaults]valueForKey:@"selectDate"]];
     
@@ -131,10 +133,10 @@
 
 - (IBAction)nextDate:(id)sender
 {
-    NSDate *currentDate=[[NSUserDefaults standardUserDefaults]valueForKey:@"dafault_selectDate"];
+    NSDate *currentDate1=[[NSUserDefaults standardUserDefaults]valueForKey:@"dafault_selectDate"];
     
     NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    NSDateComponents *todayComponents = [gregorian components:(NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit) fromDate:currentDate];
+    NSDateComponents *todayComponents = [gregorian components:(NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit) fromDate:currentDate1];
     NSInteger theDay = [todayComponents day];
     NSInteger theMonth = [todayComponents month];
     NSInteger theYear = [todayComponents year];
@@ -148,19 +150,34 @@
     
     NSDateComponents *offsetComponents = [[NSDateComponents alloc] init];
     [offsetComponents setDay:1];
-    NSDate *nextDate = [gregorian dateByAddingComponents:offsetComponents toDate:currentDate options:0];
-    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
-    [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
-    lblDate.text=[self getDateFromString:nextDate];
-    [self viewWillAppear:YES];
+    NSDate *nextDate = [gregorian dateByAddingComponents:offsetComponents toDate:currentDate1 options:0];
+    
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd";
+    NSString * date=[dateFormatter stringFromDate:nextDate];
+    
+    if ([KappDelgate isSymptomFoundOnDate:date])
+    {
+        [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
+        [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
+        lblDate.text=[self getDateFromString:nextDate];
+        [self viewWillAppear:YES];
+    }
+    else
+    {
+        [KappDelgate showAlertView:nil with:@"No event found"];
+    }
+
+    
+
 }
 
 - (IBAction)previousDate:(id)sender
 {
-    NSDate *currentDate=[[NSUserDefaults standardUserDefaults]valueForKey:@"dafault_selectDate"];
+    NSDate *currentDate1=[[NSUserDefaults standardUserDefaults]valueForKey:@"dafault_selectDate"];
     
     NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    NSDateComponents *todayComponents = [gregorian components:(NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit) fromDate:currentDate];
+    NSDateComponents *todayComponents = [gregorian components:(NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit) fromDate:currentDate1];
     NSInteger theDay = [todayComponents day];
     NSInteger theMonth = [todayComponents month];
     NSInteger theYear = [todayComponents year];
@@ -174,11 +191,24 @@
     
     NSDateComponents *offsetComponents = [[NSDateComponents alloc] init];
     [offsetComponents setDay:-1];
-    NSDate *nextDate = [gregorian dateByAddingComponents:offsetComponents toDate:currentDate options:0];
-    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
-    [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
-    lblDate.text=[self getDateFromString:nextDate];
-    [self viewWillAppear:YES];
+    NSDate *nextDate = [gregorian dateByAddingComponents:offsetComponents toDate:currentDate1 options:0];
+    
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd";
+    NSString * date=[dateFormatter stringFromDate:nextDate];
+    
+    if ([KappDelgate isSymptomFoundOnDate:date])
+    {
+        [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
+        [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
+        lblDate.text=[self getDateFromString:nextDate];
+        [self viewWillAppear:YES];
+    }
+    else
+    {
+        [KappDelgate showAlertView:nil with:@"No event found"];
+    }
+
     
 }
 -(NSString *)getDateFromString:(NSDate *)string

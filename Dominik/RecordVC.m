@@ -48,7 +48,7 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    
+    [database open];
     recordArr=[NSMutableArray new];
     userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
     selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
@@ -60,9 +60,11 @@
     {
         [recordArr addObject:[recordResults resultDictionary]];
     }
-    
+    [database close];
     [tblRecord reloadData];
     [recordResults close];
+    
+    tblRecord.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
 }
 
 
@@ -273,10 +275,31 @@
     NSDateComponents *offsetComponents = [[NSDateComponents alloc] init];
     [offsetComponents setDay:1];
     NSDate *nextDate = [gregorian dateByAddingComponents:offsetComponents toDate:currentDate options:0];
-    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
-    [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
-    lblDate.text=[self getDateFromString:nextDate];
-    [self viewWillAppear:YES];
+    
+    
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd";
+    NSString * date=[dateFormatter stringFromDate:nextDate];
+    
+    
+    if ([KappDelgate isSymptomFoundOnDate:date])
+    {
+        [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
+        [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
+        lblDate.text=[self getDateFromString:nextDate];
+        [self viewWillAppear:YES];
+    }
+    else
+    {
+        [KappDelgate showAlertView:nil with:@"No event found"];
+    }
+
+    
+    
+//    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
+//    [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
+//    lblDate.text=[self getDateFromString:nextDate];
+//    [self viewWillAppear:YES];
 }
 
 - (IBAction)previousDate:(id)sender
@@ -299,10 +322,27 @@
     NSDateComponents *offsetComponents = [[NSDateComponents alloc] init];
     [offsetComponents setDay:-1];
     NSDate *nextDate = [gregorian dateByAddingComponents:offsetComponents toDate:currentDate options:0];
-    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
-    [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
-    lblDate.text=[self getDateFromString:nextDate];
-    [self viewWillAppear:YES];
+    
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd";
+    NSString * date=[dateFormatter stringFromDate:nextDate];
+    
+    if ([KappDelgate isSymptomFoundOnDate:date])
+    {
+        [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
+        [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
+        lblDate.text=[self getDateFromString:nextDate];
+        [self viewWillAppear:YES];
+    }
+    else
+    {
+        [KappDelgate showAlertView:nil with:@"No Record found"];
+    }
+    
+//    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:nextDate] forKey:@"selectDate"];
+//    [[NSUserDefaults standardUserDefaults]setObject:nextDate forKey:@"dafault_selectDate"];
+//    lblDate.text=[self getDateFromString:nextDate];
+//    [self viewWillAppear:YES];
     
 }
 -(NSString *)getDateFromString:(NSDate *)string

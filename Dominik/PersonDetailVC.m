@@ -9,6 +9,7 @@
 #import "PersonDetailVC.h"
 #import "FMDatabase.h"
 #import "PersonDetailCell.h"
+#import "AppDelegate.h"
 
 @interface PersonDetailVC ()
 {
@@ -20,6 +21,11 @@
     NSMutableArray *dateArr;
     NSMutableDictionary *personDic;
     NSMutableArray *fetchArray;
+    NSMutableArray *symptomArr;
+    NSInteger arrCount;
+    int sectionHeight;
+    NSMutableArray *totalArr;
+    BOOL temp;
 
     
 }
@@ -27,15 +33,18 @@
 @end
 
 @implementation PersonDetailVC
+@synthesize date;
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
+    totalArr=[[NSMutableArray alloc]init];
     fetchArray=[[NSMutableArray alloc]init];
     personArr=[[NSMutableArray alloc]init];
     dateArr =[[NSMutableArray alloc]init];
     personDic=[[NSMutableDictionary alloc]init];
+    symptomArr=[[NSMutableArray alloc]init];
     
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *docsPath = [paths objectAtIndex:0];
@@ -48,7 +57,10 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    
+    arrCount=0;
+    sectionHeight=0;
+    isScrolled=YES;
+    temp=YES;
     
     personArr=[NSMutableArray new];
     dateArr =[[NSMutableArray alloc]init];
@@ -56,7 +68,7 @@
     
     userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
     selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
-    NSString *sql = [NSString stringWithFormat:@"SELECT date FROM peopleTbl where user_id='%@'",userId];
+    NSString *sql = [NSString stringWithFormat:@"SELECT date FROM peopleTbl where user_id='%@' ORDER BY date ASC",userId];
     FMResultSet *foodResults = [database executeQuery:sql];
     
     while([foodResults next])
@@ -64,14 +76,24 @@
         [dateArr addObject:[foodResults resultDictionary]];
     }
     
+    
+
+    
     NSOrderedSet *orderedSet = [NSOrderedSet orderedSetWithArray:dateArr];
     dateArr = [orderedSet array];
+    
+    anIndex=[[dateArr valueForKey:@"date"] indexOfObject:date];
+    if(NSNotFound == anIndex) {
+        NSLog(@"not found");
+        [KappDelgate showAlertView:nil with:@"Not found on this  date"];
+        anIndex=0;
+    }
     
     [foodResults close];
     
     for (int i=0; i<dateArr.count; i++)
     {
-        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM peopleTbl where user_id='%@' AND date='%@'",userId,[[dateArr valueForKey:@"date"]objectAtIndex:i]];
+        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM peopleTbl where user_id='%@' AND date='%@' ORDER BY date ASC",userId,[[dateArr valueForKey:@"date"]objectAtIndex:i]];
         FMResultSet *foodResults = [database executeQuery:sql];
         fetchArray=[[NSMutableArray alloc]init];
         while ([foodResults next])
@@ -79,7 +101,19 @@
             [fetchArray addObject:[foodResults resultDictionary]];
             [personDic setObject:fetchArray forKey:[[dateArr valueForKey:@"date"] objectAtIndex:i]];
         }
+        
+        [database open];
+        NSString *sqlsymptom = [NSString stringWithFormat:@"SELECT * FROM SymptomTable WHERE  date ='%@' AND isActive='%@' ORDER BY date ASC",[[dateArr valueForKey:@"date"]objectAtIndex:i],@"1"];
+        
+        FMResultSet *results = [database executeQuery:sqlsymptom];
+        if([results next])
+        {
+            [symptomArr addObject:[results resultDictionary]];
+        }
+
     }
+    peopleTable.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+
     
 }
 
@@ -111,6 +145,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    
     static NSString *MyIdentifier = @"PersonDetailCell";
     PersonDetailCell *cell = [tableView dequeueReusableCellWithIdentifier:MyIdentifier];
     if (cell == nil)
@@ -121,6 +156,53 @@
     
     NSString *sectionTitle = [dateArr objectAtIndex:indexPath.section];
     personArr = [personDic objectForKey:[sectionTitle valueForKey:@"date"]];
+    NSLog(@"%@",personArr);
+    
+    
+    if (temp==YES)
+    {
+        if (![[sectionTitle valueForKey:@"date"]isEqualToString:date])
+        {
+            for (int i=0; i<personArr.count; i++)
+            {
+                if ([totalArr containsObject:[personArr objectAtIndex:i]])
+                {
+                    NSLog(@"manu");
+                }
+                else
+                {
+                    [totalArr addObject:[personArr objectAtIndex:i]];
+                }
+            }
+            
+        }
+        else
+        {
+            temp=NO;
+            
+        }
+
+    }
+        
+    
+    if (indexPath.section<=anIndex)
+    {
+        if (indexPath.section==0)
+        {
+            arrCount=0;
+            arrCount=arrCount+(personArr.count);
+            sectionHeight=0;
+        }
+        else
+        {
+            arrCount=arrCount+(personArr.count);
+            sectionHeight=cell.frame.size.height*totalArr.count+(40*anIndex);
+            
+        }
+        
+       
+        
+    }
     
     
     cell.lblPerson.text=[[personArr valueForKey:@"peopleName"] objectAtIndex:indexPath.row];
@@ -139,9 +221,18 @@
         [cell.imagePerson setImage:[UIImage imageWithContentsOfFile:getImagePath] ];
     }
     
+    if (isScrolled==YES)
+    {
+        [peopleTable setContentOffset:CGPointMake(0,sectionHeight) animated:NO];
+    }
     
     
     return cell;
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    isScrolled=NO;
 }
 
 
@@ -158,6 +249,17 @@
     NSDictionary *sectionTitle = [dateArr objectAtIndex:section];
     label.text = [sectionTitle valueForKey:@"date"];
     [headerView addSubview:label];
+ 
+    
+    UILabel *symptomlabel = [[UILabel alloc] initWithFrame:CGRectMake(110, 5, 200, 30)];
+    symptomlabel.textColor = [UIColor whiteColor];
+    symptomlabel.backgroundColor = [UIColor clearColor];
+    NSDictionary *sectionTitle1 = [symptomArr objectAtIndex:section];
+    symptomlabel.textAlignment=NSTextAlignmentRight;
+    symptomlabel.text = [NSString stringWithFormat:@"%@,Pain lavel %@",[sectionTitle1 valueForKey:@"symptomName"],[sectionTitle1 valueForKey:@"painLavel"]];
+    symptomlabel.font=[UIFont systemFontOfSize:13.0f];
+    [headerView addSubview:symptomlabel];
+    
     return headerView;
 }
 

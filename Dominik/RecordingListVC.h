@@ -9,8 +9,12 @@
 #import <UIKit/UIKit.h>
 
 @interface RecordingListVC : UIViewController
+{
+    NSInteger anIndex;
+    BOOL isScrolled;
+}
 
-
+@property(strong,nonatomic)NSString* date;
 - (IBAction)logoutAction:(id)sender;
 
 - (IBAction)backbtnAction:(id)sender;

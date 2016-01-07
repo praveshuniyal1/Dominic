@@ -10,13 +10,14 @@
 
 @interface FurtherQuestionVC : UIViewController
 {
-    
+    NSInteger anIndex;
+    BOOL isScrolled;
  
 }
 
 
 
-
+@property(strong,nonatomic)NSString* date;
 
 
 - (IBAction)logoutAction:(id)sender;

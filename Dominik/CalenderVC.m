@@ -46,14 +46,39 @@
 {
     NSLog(@"select date:%@", selectDate);
     
+    NSDate *currentDate=[NSDate date];
+    [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:currentDate] forKey:@"CurrentDate"];
+    
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd";
+    NSString * date=[dateFormatter stringFromDate:selectDate];
+    
+    
     id object=selectDate;
     if (object)
     {
-        
+        if ([KappDelgate isCurrentDate:date])
+        {
             DetailVC *detailView = [self.storyboard instantiateViewControllerWithIdentifier:@"Detail"];
             [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:selectDate] forKey:@"selectDate"];
             [[NSUserDefaults standardUserDefaults]setObject:selectDate forKey:@"dafault_selectDate"];
             [self.navigationController pushViewController:detailView animated:YES];
+        }
+        else
+        {
+            if ([KappDelgate isSymptomFoundOnDate:date])
+            {
+                DetailVC *detailView = [self.storyboard instantiateViewControllerWithIdentifier:@"Detail"];
+                [[NSUserDefaults standardUserDefaults]setObject:[self getDateFromString:selectDate] forKey:@"selectDate"];
+                [[NSUserDefaults standardUserDefaults]setObject:selectDate forKey:@"dafault_selectDate"];
+                [self.navigationController pushViewController:detailView animated:YES];
+            }
+            else
+            {
+                [KappDelgate showAlertView:nil with:@"No event found"];
+            }
+            
+        }
     }
 
 

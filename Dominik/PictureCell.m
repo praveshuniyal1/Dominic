@@ -12,7 +12,7 @@
 {
     int inctrmnt;
 }
-@synthesize scrollView,imageView,lblDate,btnBack,btnNext;
+@synthesize scrollView,imageView,lblDate,btnBack,btnNext,lblSymptom,lblSymLvl;
 
 
 

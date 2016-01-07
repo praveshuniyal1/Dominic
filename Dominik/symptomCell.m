@@ -1,17 +1,15 @@
 //
-//  WetherCell.m
+//  symptomCell.m
 //  Dominik
 //
-//  Created by amit varma on 04/11/15.
+//  Created by amit varma on 23/12/15.
 //  Copyright © 2015 trigma. All rights reserved.
 //
 
-#import "WetherCell.h"
+#import "symptomCell.h"
 
-@implementation WetherCell
-@synthesize lblAftTemp,lblEveTemp,lblMorTemp;
-@synthesize imgAft,imgEve,imgMor;
-
+@implementation symptomCell
+@synthesize hideBtn,lblSymptom;
 
 - (void)awakeFromNib {
     // Initialization code

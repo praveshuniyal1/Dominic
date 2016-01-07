@@ -272,7 +272,7 @@
             
             while ([results next])
             {
-                
+                [KappDelgate showAlertView:nil with:@"data saved successfully"];
             }
             [database close];
             [results close];

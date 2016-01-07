@@ -12,6 +12,7 @@
 #import "FMDatabase.h"
 #import "CollectionView.h"
 #import "TableViewCell.h"
+#import "ControlVC.h"
 
 
 
@@ -25,6 +26,8 @@
     NSInteger indexpath;
     
 }
+
+@property (nonatomic, strong) UIPopoverController *popOver;
 
 @end
 
@@ -69,7 +72,7 @@
     }
     [symptomTable reloadData];
     [results close];
-    
+     symptomTable.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     
 }
 
@@ -87,7 +90,8 @@
 
 - (IBAction)backbtnAction:(id)sender
 {
-    [self.navigationController popViewControllerAnimated:YES];
+   //    [self.navigationController popViewControllerAnimated:YES];
+    [KappDelgate tabbar];
 }
 
 
@@ -170,6 +174,7 @@
         if(cell == nil) {
             cell = [[[NSBundle mainBundle]loadNibNamed:@"TableViewCell" owner:nil options:nil] firstObject];
         }
+        [cell setSelectionStyle:UITableViewCellSelectionStyleNone];
         [cell configUI:indexPath];
         return  cell;
     }
@@ -191,6 +196,29 @@
         return label;
     }
     return nil;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    indexpath=indexPath.row;
+ 
+    if (tableView==graphTable)
+    {
+        ControlVC *Control = [self.storyboard instantiateViewControllerWithIdentifier:@"ControlVC"];
+        [self.navigationController pushViewController:Control animated:YES];
+    }
+    else if (tableView==symptomTable)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"Go to Symptom?"
+                                                       delegate:self
+                                              cancelButtonTitle:@"No"
+                                              otherButtonTitles:@"Yes",nil];
+        [alert show];
+    }
+    
+    
+    
+   
 }
 
 
@@ -228,8 +256,25 @@
         {
             UIImagePickerController * picker = [[UIImagePickerController alloc] init] ;
             picker.delegate = self;
-            picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            [self presentViewController:picker animated:YES completion:^{}];
+            
+            if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+            {
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    //your code
+                    
+                    UIPopoverController *popover = [[UIPopoverController alloc] initWithContentViewController:picker];
+                    [popover presentPopoverFromRect:CGRectMake(450.0f, 825.0f, 10.0f, 10.0f) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+                    self.popOver = popover;
+                }];
+                
+                
+                
+            } else
+            {
+                picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+                [self presentViewController:picker animated:YES completion:^{}];
+            }
+
         }
         default:
             // Do Nothing.........
@@ -322,23 +367,15 @@
 
 
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-   
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
-                                                    message:@"Go to Symptom?"
-                                                   delegate:self
-                                          cancelButtonTitle:@"No"
-                                          otherButtonTitles:@"Yes",nil];
-    [alert show];
-}
+
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (buttonIndex == 1)
     {
-        CollectionView *foodView = [self.storyboard instantiateViewControllerWithIdentifier:@"CollectionView"];
-        [self.navigationController pushViewController:foodView animated:YES];
+        CollectionView *collectionView = [self.storyboard instantiateViewControllerWithIdentifier:@"CollectionView"];
+        collectionView.symptomName=[[symptomArr valueForKey:@"symptomName"] objectAtIndex:indexpath];
+        [self.navigationController pushViewController:collectionView animated:YES];
         
 
      }

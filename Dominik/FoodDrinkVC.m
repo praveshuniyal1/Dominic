@@ -24,6 +24,8 @@
 
 }
 
+@property (nonatomic, strong) UIPopoverController *popOver;
+
 @end
 
 @implementation FoodDrinkVC
@@ -55,6 +57,7 @@
     [foodTable reloadData];
     [foodResults close];
     
+     foodTable.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     
 }
 
@@ -156,42 +159,49 @@
 
 - (IBAction)addAction:(id)sender
 {
-    
-    foodArr=[NSMutableArray new];
-    database = [FMDatabase databaseWithPath:path];
-    [database open];
-    [database executeUpdate:@"create table AddFoodTbl(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,user_id text,foodName text,date text,image text)"];
-    
-    
-    NSString *searchString = searchBar.text;
-    NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
-    NSString *sql = [NSString stringWithFormat:@"SELECT foodName FROM AddFoodTbl WHERE foodName ='%@'",searchString];
-    
-    FMResultSet *results = [database executeQuery:sql, likeParameter];
-    if ([results next])
+    if (searchBar.text.length==0)
     {
-        [KappDelgate showAlertView:@"Message" with:@"this food is allready added"];
-        [results close];
+        [KappDelgate showAlertView:nil with:@"Please fill Food and Drink Name"];
     }
-    else
-    {
-        NSString *query = [NSString stringWithFormat:@"insert into AddFoodTbl(user_id,foodName,date) values ('%@','%@','%@')",
-                           userId,searchBar.text,[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"]];
-        [database executeUpdate:query];
+    else{
+        foodArr=[NSMutableArray new];
+        database = [FMDatabase databaseWithPath:path];
+        [database open];
+        [database executeUpdate:@"create table AddFoodTbl(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,user_id text,foodName text,date text,image text)"];
         
-        NSString *sql = [NSString stringWithFormat:@"SELECT foodName FROM AddFoodTbl where user_id='%@' and date='%@'",userId,selectDate];
-        FMResultSet *results = [database executeQuery:sql];
-       
-        while ([results next])
+        
+        NSString *searchString = searchBar.text;
+        NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
+        NSString *sql = [NSString stringWithFormat:@"SELECT foodName FROM AddFoodTbl WHERE foodName ='%@' and date='%@'",searchString,selectDate];
+        
+        FMResultSet *results = [database executeQuery:sql, likeParameter];
+        if ([results next])
         {
-            [foodArr addObject:[results resultDictionary]];
+            [KappDelgate showAlertView:@"Message" with:@"this food is allready added"];
+            [results close];
         }
-        [database close];
-        [results close];
-        [foodTable reloadData];
-        
-        
+        else
+        {
+            NSString *query = [NSString stringWithFormat:@"insert into AddFoodTbl(user_id,foodName,date) values ('%@','%@','%@')",
+                               userId,searchBar.text,[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"]];
+            [database executeUpdate:query];
+            
+            NSString *sql = [NSString stringWithFormat:@"SELECT foodName FROM AddFoodTbl where user_id='%@' and date='%@'",userId,selectDate];
+            FMResultSet *results = [database executeQuery:sql];
+            
+            while ([results next])
+            {
+                [foodArr addObject:[results resultDictionary]];
+            }
+            [database close];
+            [results close];
+            [foodTable reloadData];
+            
+            
+        }
+
     }
+    
     
     
 }
@@ -230,8 +240,25 @@
         {
             UIImagePickerController * picker = [[UIImagePickerController alloc] init] ;
             picker.delegate = self;
-            picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            [self presentViewController:picker animated:YES completion:^{}];
+            
+            if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+            {
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    //your code
+                    
+                    UIPopoverController *popover = [[UIPopoverController alloc] initWithContentViewController:picker];
+                    [popover presentPopoverFromRect:CGRectMake(450.0f, 825.0f, 10.0f, 10.0f) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+                    self.popOver = popover;
+                }];
+                
+                
+                
+            } else
+            {
+                picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+                [self presentViewController:picker animated:YES completion:^{}];
+            }
+
         }
         default:
             // Do Nothing.........

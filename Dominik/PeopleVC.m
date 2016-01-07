@@ -25,6 +25,8 @@
     NSInteger indexpath;
 }
 
+@property (nonatomic, strong) UIPopoverController *popOver;
+
 @end
 
 @implementation PeopleVC
@@ -64,13 +66,11 @@
     {
         [peopleArr addObject:[peopleResults resultDictionary]];
     }
-    
     [tblPeople reloadData];
     [peopleResults close];
-
     
-    
-    
+    tblContect.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+    tblPeople.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     
     
     
@@ -281,7 +281,7 @@
         
         NSString *searchString = [[searchResults valueForKey:@"name"] objectAtIndex:indexPath.row];
         NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
-        NSString *sql = [NSString stringWithFormat:@"SELECT peopleName FROM peopleTbl WHERE peopleName ='%@'",searchString];
+        NSString *sql = [NSString stringWithFormat:@"SELECT peopleName FROM peopleTbl WHERE peopleName ='%@' and date='%@'",searchString,selectDate];
         
         FMResultSet *results = [database executeQuery:sql, likeParameter];
         if ([results next])
@@ -382,8 +382,25 @@
         {
             UIImagePickerController * picker = [[UIImagePickerController alloc] init] ;
             picker.delegate = self;
-            picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            [self presentViewController:picker animated:YES completion:^{}];
+            
+            if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+            {
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    //your code
+                    
+                    UIPopoverController *popover = [[UIPopoverController alloc] initWithContentViewController:picker];
+                    [popover presentPopoverFromRect:CGRectMake(450.0f, 825.0f, 10.0f, 10.0f) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+                    self.popOver = popover;
+                }];
+                
+                
+                
+            } else
+            {
+                picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+                [self presentViewController:picker animated:YES completion:^{}];
+            }
+
         }
         default:
             // Do Nothing.........

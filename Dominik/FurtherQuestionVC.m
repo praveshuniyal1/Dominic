@@ -20,12 +20,14 @@
     NSString *userId;
     NSString *selectDate;
     NSMutableArray *questionArr;
+    NSMutableArray *symptomArr;
     
 }
 
 @end
 
 @implementation FurtherQuestionVC
+@synthesize date;
 
 - (void)viewDidLoad
 {
@@ -43,10 +45,12 @@
 }
 -(void)viewWillAppear:(BOOL)animated
 {
+    isScrolled=YES;
+    
     userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
     selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
     
-    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM questionTbl where user_id='%@'",userId];
+    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM questionTbl where user_id='%@' ORDER BY date ASC",userId];
     FMResultSet *results = [database executeQuery:sql];
     
     while ([results next])
@@ -55,6 +59,33 @@
     }
     [database close];
     [results close];
+    
+    anIndex=[[questionArr valueForKey:@"date"] indexOfObject:date];
+    if(NSNotFound == anIndex) {
+        NSLog(@"not found");
+         [KappDelgate showAlertView:nil with:@"Not found on this  date"];
+        anIndex=0;
+    }
+
+    
+    
+   
+    symptomArr=[[NSMutableArray alloc]init];
+    [database open];
+    NSString *sqlsymptom = [NSString stringWithFormat:@"SELECT * FROM SymptomTable WHERE  isActive='%@' ORDER BY date ASC",@"1" ];
+    
+    FMResultSet *resultssym = [database executeQuery:sqlsymptom];
+    while([resultssym next])
+    {
+        [symptomArr addObject:[resultssym resultDictionary]];
+    }
+    [resultssym close];
+    [database close];
+    
+
+    
+    
+
     
 }
 
@@ -98,6 +129,10 @@
         cell = [[FurtherQuestionCell alloc] initWithStyle:UITableViewCellStyleDefault
                                      reuseIdentifier:MyIdentifier];
     }
+    if (isScrolled==YES)
+    {
+        [tableView setContentOffset:CGPointMake(0,cell.frame.size.height*anIndex) animated:NO];
+    }
     
     
     cell.sliderStress.value=[[[questionArr valueForKey:@"stress"] objectAtIndex:indexPath.row] floatValue];
@@ -112,9 +147,15 @@
      cell.lblBodyWt.text=[NSString stringWithFormat:@"%@ Lavel",[[questionArr valueForKey:@"bodyWeight"] objectAtIndex:indexPath.row]];
     cell.lblAntrieb.text=[NSString stringWithFormat:@"%@ Lavel",[[questionArr valueForKey:@"antrieb"] objectAtIndex:indexPath.row]];
     cell.lblDate.text=[[questionArr valueForKey:@"date"] objectAtIndex:indexPath.row];
+    cell.lblPainLavel.text=[NSString stringWithFormat:@"%@,Pain lavel %@",[[symptomArr objectAtIndex:indexPath.row]valueForKey:@"symptomName"],[[symptomArr objectAtIndex:indexPath.row]valueForKey:@"painLavel"]];
+    
     
     
     return cell;
+}
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    isScrolled=NO;
 }
 
 

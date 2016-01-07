@@ -7,12 +7,26 @@
 //
 
 #import "CollectionViewCell.h"
+#import "Constants.h"
 
 @implementation CollectionViewCell
 @synthesize lblDate,lblPainLavel;
 @synthesize btnAction,btnFood,btnLocation,btnPerson,btnPicture,btnRecord,btnWeather;
 
-- (void)awakeFromNib {
+
+
+- (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)bundle
+{
+    if (IS_IPAD)
+    {
+        
+    } else {
+        
+    }
+    return nil;
+}
+- (void)awakeFromNib
+{
     // Initialization code
 }
 

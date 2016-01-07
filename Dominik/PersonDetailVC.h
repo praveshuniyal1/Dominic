@@ -12,11 +12,12 @@
 {
     
     IBOutlet UITableView *peopleTable;
-    
+    NSInteger anIndex;
+    BOOL isScrolled;
     
 }
 
 
-
+@property(strong,nonatomic)NSString* date;
 
 @end

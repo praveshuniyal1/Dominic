@@ -11,6 +11,7 @@
 #import "CalenderVC.h"
 #import "FMDatabase.h"
 #import "LocationManager.h"
+#import "Constants.h"
 
 
 
@@ -43,9 +44,20 @@
     [self tabbar];
     
     
-    ViewController *loginController=[[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"ViewController"]; //or the homeController
-    UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:loginController];
-    self.window.rootViewController=navController;
+    if (IS_IPAD)
+    {
+        ViewController *loginController=[[UIStoryboard storyboardWithName:@"Main_iPad" bundle:nil] instantiateViewControllerWithIdentifier:@"ViewController"]; //or the homeController
+        UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:loginController];
+        self.window.rootViewController=navController;
+
+    }
+    else{
+        ViewController *loginController=[[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"ViewController"]; //or the homeController
+        UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:loginController];
+        self.window.rootViewController=navController;
+
+    }
+    
     
     [[UINavigationBar appearance] setBarTintColor:[UIColor colorWithRed:94/255.0f green:165/255.0f blue:43/255.0f alpha:1.0f]];
     self.window.backgroundColor=[UIColor whiteColor];
@@ -97,30 +109,58 @@
 
 -(void)makeClenderAsRootView
 {
-    CalenderVC *calenderController=[[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"CalenderVC"]; //or the homeController
-    UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:calenderController];
-    self.window.rootViewController=navController;
+    
+    if (IS_IPAD)
+    {
+        CalenderVC *calenderController=[[UIStoryboard storyboardWithName:@"Main_iPad" bundle:nil] instantiateViewControllerWithIdentifier:@"CalenderVC"]; //or the homeController
+        UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:calenderController];
+        self.window.rootViewController=navController;
+    }
+    else{
+        CalenderVC *calenderController=[[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"CalenderVC"]; //or the homeController
+        UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:calenderController];
+        self.window.rootViewController=navController;
+    }
+   
     self.window.backgroundColor=[UIColor whiteColor];
     [self.window makeKeyAndVisible];
    
 }
 -(void)logout
 {
-    ViewController *loginController=[[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"ViewController"]; //or the homeController
-    UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:loginController];
-    self.window.rootViewController=navController;
+    if (IS_IPAD)
+    {
+        ViewController *loginController=[[UIStoryboard storyboardWithName:@"Main_iPad" bundle:nil] instantiateViewControllerWithIdentifier:@"ViewController"];
+          UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:loginController];
+        self.window.rootViewController=navController;
+    }
+    else{
+         ViewController *loginController=[[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"ViewController"]; //or the homeController
+          UINavigationController *navController=[[UINavigationController alloc]initWithRootViewController:loginController];
+        self.window.rootViewController=navController;
+    }
+   
+  
+    
     self.window.backgroundColor=[UIColor whiteColor];
     [self.window makeKeyAndVisible];
    
 }
 -(void)tabbar
 {
+    if (IS_IPAD)
+    {
+        storyboard = [UIStoryboard storyboardWithName:@"Main_iPad" bundle: nil];
+    }
+    else{
+        storyboard = [UIStoryboard storyboardWithName:@"Main" bundle: nil];
+    }
     
-    storyboard = [UIStoryboard storyboardWithName:@"Main" bundle: nil];
+    
     ViewControllerObj = [storyboard instantiateViewControllerWithIdentifier:@"Detail"];
-    FirstViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"ActionPlanVC"];
-    SecondViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"ControlVC"];
-    ThirdViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"SymptomList"];
+    FirstViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"SymptomList"];
+    SecondViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"WhatsPlanVC"];
+    ThirdViewControllerObj=[storyboard instantiateViewControllerWithIdentifier:@"SymptomesVC"];
    
     
     
@@ -167,6 +207,59 @@
     
    
     
+}
+-(BOOL)isCurrentDate:(NSString*)date
+{
+    NSDate *defaultcurrentDate=[NSDate date];
+    
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd";
+    NSString * currentDate=[dateFormatter stringFromDate:defaultcurrentDate];
+    if ([currentDate isEqualToString:date])
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+    
+    return YES;
+}
+-(BOOL)isSymptomFoundOnDate:(NSString*)selectDate
+{
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateFormat = @"yyyy-MM-dd";
+    NSDate * date=[dateFormatter dateFromString:selectDate];
+    
+    [self initialiseDataBase];
+    [database open];
+    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM SymptomTable WHERE date ='%@'AND isHidden='%@'",[self getDateFromString:date],@"0"];
+    
+    FMResultSet *results = [database executeQuery:sql];
+    if  ([results next])
+    {
+        [results close];
+        [database close];
+        return YES;
+
+    }
+    else{
+        return NO;
+    }
+    
+   
+    return YES;
+}
+
+-(NSString *)getDateFromString:(NSDate *)string
+{
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"ddMMM,yyyy"];
+    NSString *stringFromDate = [formatter stringFromDate:string];
+    
+    NSLog(@"%@", stringFromDate);
+    return stringFromDate;
 }
 
 -(void)showAlertView:(NSString*)title with:(NSString*)message

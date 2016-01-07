@@ -14,5 +14,6 @@
     IBOutlet UITableView *tableCollection;
 }
 - (IBAction)backAction:(id)sender;
+@property(strong,nonatomic)NSString * symptomName;
 
 @end

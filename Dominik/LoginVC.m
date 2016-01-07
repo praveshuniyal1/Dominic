@@ -44,83 +44,113 @@
 - (IBAction)doneAction:(id)sender
 {
 
-    
-    database = [FMDatabase databaseWithPath:path];
-    [database open];
-    [database executeUpdate:@"create table UserPassword(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,name text,password text)"];
-    
-    
-    NSString *searchString = txt_userName.text;
-    NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
-    NSString *sql = @"SELECT name FROM UserPassword WHERE name LIKE ?";
-    
-    FMResultSet *name = [database executeQuery:sql, likeParameter];
-    
-    if ([name next])
+    if (txt_userName.text.length==0)
     {
+        [KappDelgate showAlertView:nil with:@"please fill user name"];
+    }
+    else if (txt_password.text.length==0)
+    {
+         [KappDelgate showAlertView:nil with:@"please fill password"];
+    }
+    else
+    {
+        database = [FMDatabase databaseWithPath:path];
+        [database open];
+        [database executeUpdate:@"create table UserPassword(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,name text,password text)"];
         
+        
+        NSString *searchString = txt_userName.text;
         NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
-        NSString *sql = @"SELECT * FROM UserPassword WHERE name LIKE ?";
+        NSString *sql = @"SELECT name FROM UserPassword WHERE name LIKE ?";
         
-        FMResultSet *passwords = [database executeQuery:sql, likeParameter];
-        if ([passwords next])
+        FMResultSet *name = [database executeQuery:sql, likeParameter];
+        
+        if ([name next])
         {
-             NSString *password  = [passwords stringForColumn:@"password"];
-            if ([password isEqualToString:txt_password.text])
+            
+            NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
+            NSString *sql = @"SELECT * FROM UserPassword WHERE name LIKE ?";
+            
+            FMResultSet *passwords = [database executeQuery:sql, likeParameter];
+            if ([passwords next])
             {
-//                NSLog(@"%@-%@-%@",[passwords stringForColumn:@"name"],[passwords stringForColumn:@"password"],[passwords stringForColumn:@"id"]);
-//                [[NSUserDefaults standardUserDefaults]setObject:[passwords stringForColumn:@"id"] forKey:@"user_id"];
+                NSString *password  = [passwords stringForColumn:@"password"];
+                
+                if ([password isEqualToString:@""])
+                {
+                    [database close];
+                    [database open];
+                    NSString *sql = [NSString stringWithFormat:@"UPDATE UserPassword SET password='%@' WHERE name='%@'",txt_password.text,txt_userName.text];
+                    BOOL success = [database executeUpdate:sql];
+                    if(success)
+                    {
+                        CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
+                        [self.navigationController pushViewController:calenderView animated:YES];
+                        [database close];
+                        [passwords close];
+                        [name close];
+                    }
+                    [database close];
+                    
+                }
+                else if(password.length>0)
+                {
+                    
+                    if ([password isEqualToString:txt_password.text])
+                    {
+                        CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
+                        [self.navigationController pushViewController:calenderView animated:YES];
+                        [database close];
+                        [passwords close];
+                        [name close];
+                        
+                    }
+                    else
+                    {
+                        [KappDelgate showAlertView:nil with:@"password is wrong"];
+                        [database close];
+                        [passwords close];
+                        [name close];
+                    }
+                }
+            }
+        }
+        
+        else
+        {
+            [database open];
+            NSString *query = [NSString stringWithFormat:@"insert into UserPassword(name,password) values ('%@','%@')",
+                               txt_userName.text,txt_password.text];
+            [database executeUpdate:query];
+            
+            
+            FMResultSet *results = [database executeQuery:@"SELECT * FROM UserPassword WHERE name LIKE ? and password LIKE ?",txt_userName.text,txt_password.text];
+            
+            if ([results next])
+            {
+                NSLog(@"%@-%@-%@",[results stringForColumn:@"name"],[results stringForColumn:@"password"],[results stringForColumn:@"id"]);
+                [[NSUserDefaults standardUserDefaults]setObject:[results stringForColumn:@"id"] forKey:@"user_id"];
+                
                 
                 CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
                 [self.navigationController pushViewController:calenderView animated:YES];
-                [database close];
-                [passwords close];
-                [name close];
-
-            }
-            else
+                
+                NSLog(@"matched");
+            } else
             {
-                [KappDelgate showAlertView:nil with:@"password is wrong"];
-                [database close];
-                [passwords close];
-                [name close];
+                NSLog(@"not matched");
             }
             
+            [database close];
+            [results close];
         }
+        
+        [name close];
+
         
     }
     
-    else
-    {
-        [database open];
-        NSString *query = [NSString stringWithFormat:@"insert into UserPassword(name,password) values ('%@','%@')",
-                           txt_userName.text,txt_password.text];
-        [database executeUpdate:query];
-        
-        
-        FMResultSet *results = [database executeQuery:@"SELECT * FROM UserPassword WHERE name LIKE ? and password LIKE ?",txt_userName.text,txt_password.text];
-        
-        if ([results next])
-        {
-            NSLog(@"%@-%@-%@",[results stringForColumn:@"name"],[results stringForColumn:@"password"],[results stringForColumn:@"id"]);
-            [[NSUserDefaults standardUserDefaults]setObject:[results stringForColumn:@"id"] forKey:@"user_id"];
-
-            
-            CalenderVC *calenderView = [self.storyboard instantiateViewControllerWithIdentifier:@"CalenderVC"];
-            [self.navigationController pushViewController:calenderView animated:YES];
-            
-            NSLog(@"matched");
-        } else
-        {
-            NSLog(@"not matched");
-        }
-        
-        [database close];
-        [results close];
-    }
     
-    [name close];
-
     
     
 }

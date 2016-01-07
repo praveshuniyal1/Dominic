@@ -56,7 +56,8 @@
         
         [UIView beginAnimations:nil context:nil];
         [UIView setAnimationDuration:0.5];
-        if ([direction isEqualToString:@"up"]) {
+        if ([direction isEqualToString:@"up"])
+        {
             self.frame = CGRectMake(btn.origin.x, btn.origin.y-*height, btn.size.width, *height);
         } else if([direction isEqualToString:@"down"]) {
             self.frame = CGRectMake(btn.origin.x, btn.origin.y+btn.size.height, btn.size.width, *height);

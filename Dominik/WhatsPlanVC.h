@@ -9,6 +9,15 @@
 #import <UIKit/UIKit.h>
 
 @interface WhatsPlanVC : UIViewController
+{
+    
+    IBOutlet UISearchBar *searchBar;
+    
+    
+    IBOutlet UITableView *whatsTable;
+}
+- (IBAction)AddAction:(id)sender;
+
 
 
 - (IBAction)logoutAction:(id)sender;

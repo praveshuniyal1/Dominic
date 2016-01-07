@@ -21,6 +21,7 @@
     NSInteger indexpath;
     NSString*  str_offline;
 }
+@property (nonatomic, strong) UIPopoverController *popOver;
 
 @end
 
@@ -54,6 +55,8 @@
     }
     [symptomTable reloadData];
     [results close];
+    symptomTable.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+
 
     
 }
@@ -177,38 +180,45 @@
 
 - (IBAction)addAction:(id)sender
 {
-
-    database = [FMDatabase databaseWithPath:path];
-    [database open];
-    [database executeUpdate:@"create table AddSymptomTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,user_id text,symptomName text,image text,isActive text)"];
-    
-    
-    NSString *searchString = searchBar.text;
-    NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
-    NSString *sql = [NSString stringWithFormat:@"SELECT symptomName FROM AddSymptomTable WHERE symptomName ='%@'",searchString];
-    
-    FMResultSet *results = [database executeQuery:sql, likeParameter];
-    if ([results next])
+    if (searchBar.text.length==0)
     {
-        [KappDelgate showAlertView:@"Message" with:@"this symptoms is allready added"];
-         [results close];
+        [KappDelgate showAlertView:nil with:@"Please fill symptom name"];
     }
-    else
-    {
-        NSString *query = [NSString stringWithFormat:@"insert into AddSymptomTable(user_id,symptomName,isActive) values ('%@','%@','%@')",
-                           userId,searchBar.text,@"0"];
-        [database executeUpdate:query];
-        symptomArr =[NSMutableArray new];
-        FMResultSet *results = [database executeQuery:@"SELECT symptomName FROM AddSymptomTable"];
-        while ([results next])
-        {
-            [symptomArr addObject:[results resultDictionary]];
-        }
-        [database close];
-        [results close];
-        [symptomTable reloadData];
+    else{
+        database = [FMDatabase databaseWithPath:path];
+        [database open];
+        [database executeUpdate:@"create table AddSymptomTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,user_id text,symptomName text,image text,isActive text,isHidden text)"];
         
+        
+        NSString *searchString = searchBar.text;
+        NSString *likeParameter = [NSString stringWithFormat:@"%%%@%%", searchString];
+        NSString *sql = [NSString stringWithFormat:@"SELECT symptomName FROM AddSymptomTable WHERE symptomName ='%@'",searchString];
+        
+        FMResultSet *results = [database executeQuery:sql, likeParameter];
+        if ([results next])
+        {
+            [KappDelgate showAlertView:@"Message" with:@"this symptoms is allready added"];
+            [results close];
+        }
+        else
+        {
+            NSString *query = [NSString stringWithFormat:@"insert into AddSymptomTable(user_id,symptomName,isActive,isHidden) values ('%@','%@','%@','%@')",
+                               userId,searchBar.text,@"0",@"0"];
+            [database executeUpdate:query];
+            symptomArr =[NSMutableArray new];
+            FMResultSet *results = [database executeQuery:@"SELECT symptomName FROM AddSymptomTable"];
+            while ([results next])
+            {
+                [symptomArr addObject:[results resultDictionary]];
+            }
+            [database close];
+            [results close];
+            [symptomTable reloadData];
+            
+        }
+
     }
+
     
    
 }
@@ -232,8 +242,25 @@
         {
             UIImagePickerController * picker = [[UIImagePickerController alloc] init] ;
             picker.delegate = self;
-            picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            [self presentViewController:picker animated:YES completion:^{}];
+            
+            if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+            {
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    //your code
+                    
+                    UIPopoverController *popover = [[UIPopoverController alloc] initWithContentViewController:picker];
+                    [popover presentPopoverFromRect:CGRectMake(450.0f, 825.0f, 10.0f, 10.0f) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+                    self.popOver = popover;
+                }];
+                
+                
+                
+            } else
+            {
+                picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+                [self presentViewController:picker animated:YES completion:^{}];
+            }
+
         }
         default:
             // Do Nothing.........

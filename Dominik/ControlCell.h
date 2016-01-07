@@ -7,7 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "UUChart.h"
 
-@interface ControlCell : UITableViewCell
+
+@interface ControlCell : UITableViewCell<UUChartDataSource>
+
+- (void)configUI:(NSIndexPath *)indexPath and:(NSMutableArray*)array;
+
+@property (strong, nonatomic) IBOutlet UILabel *lblHeader;
 
 @end

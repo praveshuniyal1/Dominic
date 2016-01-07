@@ -36,6 +36,8 @@
 -(void)makeClenderAsRootView;
 -(void)logout;
 -(void)showAlertView:(NSString*)title with:(NSString*)message;
+-(BOOL)isCurrentDate:(NSString*)date;
+-(BOOL)isSymptomFoundOnDate:(NSString*)date;
 
 
 //DatabaseWorking

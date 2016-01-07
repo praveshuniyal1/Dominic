@@ -28,12 +28,14 @@
     NSMutableArray *dateArr;
     NSMutableDictionary *locationDic;
     NSMutableArray *fetchArray;
+    NSMutableArray *symptomArr;
     
 }
 
 @end
 
 @implementation LocationDetailVC
+@synthesize date;
 
 - (void)viewDidLoad
 {
@@ -58,14 +60,21 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
+    totalArr=[[NSMutableArray alloc]init];
+    arrCount=0;
+    sectionHeight=0;
+    isScrolled=YES;
+    temp=YES;
     
+    
+    symptomArr=[[NSMutableArray alloc]init];
     locationArr=[NSMutableArray new];
     dateArr =[[NSMutableArray alloc]init];
     
     userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
     selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
     
-    NSString *sql = [NSString stringWithFormat:@"SELECT date FROM locationTbl where user_id='%@'",userId];
+    NSString *sql = [NSString stringWithFormat:@"SELECT date FROM locationTbl where user_id='%@' ORDER BY date ASC",userId];
     FMResultSet *foodResults = [database executeQuery:sql];
     
     while([foodResults next])
@@ -73,14 +82,24 @@
         [dateArr addObject:[foodResults resultDictionary]];
     }
     
+    
+   
+    
     NSOrderedSet *orderedSet = [NSOrderedSet orderedSetWithArray:dateArr];
     dateArr = [orderedSet array];
+    
+    anIndex=[[dateArr valueForKey:@"date"] indexOfObject:date];
+    if(NSNotFound == anIndex) {
+        NSLog(@"not found");
+        [KappDelgate showAlertView:nil with:@"Not found on this  date"];
+        anIndex=0;
+    }
     
     [foodResults close];
     
     for (int i=0; i<dateArr.count; i++)
     {
-        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM locationTbl where user_id='%@' AND date='%@'",userId,[[dateArr valueForKey:@"date"]objectAtIndex:i]];
+        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM locationTbl where user_id='%@' AND date='%@' ORDER BY date ASC",userId,[[dateArr valueForKey:@"date"]objectAtIndex:i]];
         FMResultSet *foodResults = [database executeQuery:sql];
         fetchArray=[[NSMutableArray alloc]init];
         while ([foodResults next])
@@ -88,7 +107,21 @@
             [fetchArray addObject:[foodResults resultDictionary]];
             [locationDic setObject:fetchArray forKey:[[dateArr valueForKey:@"date"] objectAtIndex:i]];
         }
+        
+       
+        [database open];
+        
+        NSString *sqlsymptom = [NSString stringWithFormat:@"SELECT * FROM SymptomTable WHERE  date ='%@' AND isActive='%@' ORDER BY date ASC",[[dateArr valueForKey:@"date"]objectAtIndex:i],@"1"];
+        
+        FMResultSet *results = [database executeQuery:sqlsymptom];
+        if([results next])
+        {
+            [symptomArr addObject:[results resultDictionary]];
+        }
+
     }
+    
+     locationTable.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     
 }
 
@@ -151,6 +184,51 @@
     NSDictionary *sectionTitle = [dateArr objectAtIndex:indexPath.section];
     locationArr = [locationDic objectForKey:[sectionTitle valueForKey:@"date"]];
     
+    
+    if (temp==YES)
+    {
+        if (![[sectionTitle valueForKey:@"date"]isEqualToString:date])
+        {
+            for (int i=0; i<locationArr.count; i++)
+            {
+                if ([totalArr containsObject:[locationArr objectAtIndex:i]])
+                {
+                    NSLog(@"manu");
+                }
+                else
+                {
+                    [totalArr addObject:[locationArr objectAtIndex:i]];
+                }
+            }
+        }
+        else
+        {
+            temp=NO;
+        }
+    }
+    
+    if (indexPath.section<=anIndex)
+    {
+        if (indexPath.section==0)
+        {
+            arrCount=0;
+            arrCount=arrCount+(locationArr.count);
+            sectionHeight=0;
+        }
+        else
+        {
+            arrCount=arrCount+(locationArr.count);
+            sectionHeight=(65*totalArr.count)+(253*anIndex);
+        }
+     }
+    
+    if (isScrolled==YES)
+    {
+        [tableView setContentOffset:CGPointMake(0,sectionHeight) animated:NO];
+    }
+    
+    
+    
     [cell showLocationAnnotaion:locationArr and:indexPath];
     cell.lblName.text=[[locationArr valueForKey:@"locationName"] objectAtIndex:indexPath.row];
     
@@ -167,9 +245,13 @@
         
         [cell.ImageLocation setImage:[UIImage imageWithContentsOfFile:getImagePath] ];
     }
-
     
     return cell;
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    isScrolled=NO;
 }
 
 
@@ -184,6 +266,18 @@
     NSDictionary *sectionTitle = [dateArr objectAtIndex:section];
     label.text = [sectionTitle valueForKey:@"date"];
     [headerView addSubview:label];
+    
+
+
+    UILabel *symptomlabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width-200, 5, 200, 30)];
+    symptomlabel.textColor = [UIColor whiteColor];
+    symptomlabel.backgroundColor = [UIColor clearColor];
+    NSDictionary *sectionTitle1 = [symptomArr objectAtIndex:section];
+    symptomlabel.textAlignment=NSTextAlignmentRight;
+    symptomlabel.text = [NSString stringWithFormat:@"%@,Pain lavel %@",[sectionTitle1 valueForKey:@"symptomName"],[sectionTitle1 valueForKey:@"painLavel"]];
+    symptomlabel.font=[UIFont systemFontOfSize:13.0f];
+    [headerView addSubview:symptomlabel];
+    
     return headerView;
 }
 

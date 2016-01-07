@@ -12,8 +12,17 @@
 {
     
     IBOutlet UITableView *locationTable;
+    NSInteger anIndex;
+    BOOL isScrolled;
+    
+    
+    NSInteger arrCount;
+    int sectionHeight;
+    NSMutableArray *totalArr;
+    BOOL temp;
 }
 
+@property(strong,nonatomic)NSString* date;
 
 - (IBAction)logoutAction:(id)sender;
 

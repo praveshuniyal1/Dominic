@@ -18,11 +18,14 @@
 @property (strong, nonatomic) IBOutlet UIButton *btnBack;
 
 @property (strong, nonatomic) IBOutlet UIButton *btnNext;
+@property (strong, nonatomic) IBOutlet UILabel *lblSymptom;
 
 
 - (IBAction)back:(id)sender;
 
 - (IBAction)forward:(id)sender;
+
+@property (strong, nonatomic) IBOutlet UILabel *lblSymLvl;
 
 
 @end

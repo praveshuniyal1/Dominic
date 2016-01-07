@@ -23,5 +23,10 @@
 @property (strong, nonatomic) IBOutlet UIButton *btnSelect;
 @property (strong, nonatomic) IBOutlet UIButton *imageSymptom;
 
+@property (strong, nonatomic) IBOutlet UITextField *textField;
+
+
 - (IBAction)selectClicked:(id)sender;
+
+-(void)loadDropDownValue;
 @end

@@ -24,7 +24,7 @@
 
 
 - (IBAction)AddAction:(id)sender;
-
+@property(strong,nonatomic)NSString *date;
 
 @property (nonatomic, strong) IBOutlet MKMapView *mapView;
 

@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SymptomList : UIViewController<UIAlertViewDelegate>
+@interface SymptomList : UIViewController<UIAlertViewDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 {
     
     IBOutlet UITableView *symptomTable;

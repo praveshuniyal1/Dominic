@@ -10,6 +10,7 @@
 #import "RecordingListCell.h"
 #import "RecordingsVC.h"
 #import "FMDatabase.h"
+#import "AppDelegate.h"
 
 @interface RecordingListVC ()
 {
@@ -25,6 +26,7 @@
 @end
 
 @implementation RecordingListVC
+@synthesize date;
 
 - (void)viewDidLoad
 {
@@ -41,11 +43,13 @@
 }
 -(void)viewWillAppear:(BOOL)animated
 {
+    isScrolled=YES;
+    
     recordArr=[NSMutableArray new];
     userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
     selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
     
-    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM recordTbl where user_id='%@' and date='%@'",userId,selectDate];
+    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM recordTbl where user_id='%@' and date='%@' ORDER BY date ASC",userId,selectDate];
     FMResultSet *recordResults = [database executeQuery:sql];
     
     while([recordResults next])
@@ -53,6 +57,15 @@
         [recordArr addObject:[recordResults resultDictionary]];
     }
     [recordResults close];
+    
+    anIndex=[[recordArr valueForKey:@"date"] indexOfObject:date];
+    if(NSNotFound == anIndex) {
+        NSLog(@"not found");
+         [KappDelgate showAlertView:nil with:@"Not found on this  date"];
+        anIndex=0;
+    }
+    
+    
 
 }
 
@@ -100,8 +113,20 @@
     cell.lblDate.text=[[recordArr valueForKey:@"date"]objectAtIndex:indexPath.row];
     cell.lblDetail.text=[[recordArr valueForKey:@"recordName"]objectAtIndex:indexPath.row];
     
+    if (isScrolled==YES)
+    {
+        [tableView setContentOffset:CGPointMake(0,cell.frame.size.height*anIndex) animated:NO];
+    }
+
+    
     return cell;
 }
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    isScrolled=NO;
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     RecordingsVC *recordingView = [self.storyboard instantiateViewControllerWithIdentifier:@"RecordingsVC"];

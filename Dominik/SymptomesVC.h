@@ -9,6 +9,13 @@
 #import <UIKit/UIKit.h>
 
 @interface SymptomesVC : UIViewController
+{
+    
+    
+    IBOutlet UITableView *symptomTbl;
+    
+    
+}
 
 
 

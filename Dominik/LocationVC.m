@@ -31,12 +31,16 @@
     NSString *latitute;
     NSString * longitude;
      NSInteger indexpath;
+    
+  
 }
+
+@property (nonatomic, strong) UIPopoverController *popOver;
 
 @end
 
 @implementation LocationVC
-@synthesize mapView;
+@synthesize mapView,date;
 
 - (void)viewDidLoad
 {
@@ -71,19 +75,27 @@
 }
 -(void)viewWillAppear:(BOOL)animated
 {
+  
+
+    
+    
     locationArr=[NSMutableArray new];
     userId=[[NSUserDefaults standardUserDefaults]objectForKey:@"user_id"];
     selectDate=[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"];
-    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM locationTbl where user_id='%@' and date='%@'",userId,selectDate];
+    NSString *sql = [NSString stringWithFormat:@"SELECT * FROM locationTbl where user_id='%@' and date='%@' ORDER BY date ASC",userId,selectDate];
     FMResultSet *locationResults = [database executeQuery:sql];
     
     while([locationResults next])
     {
         [locationArr addObject:[locationResults resultDictionary]];
     }
+   
+
     
     [tblLocation reloadData];
     [locationResults close];
+    tblLocation.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+     tblSearch.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
 
 }
 
@@ -128,7 +140,9 @@
         tblSearch.hidden=NO;
         responceArray=[[NSMutableArray alloc]init];
         searchdata = YES;
-        NSMutableString * googlePlaceUrl=[NSMutableString stringWithFormat:@"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%f,%f&radius=50000&keyword=%@&key=%@",[[[NSUserDefaults standardUserDefaults]valueForKey:@"Latitude"] floatValue], [[[NSUserDefaults standardUserDefaults]valueForKey:@"Longitude"] floatValue],searchText,KgoogleApiKey];
+       NSString *finalSearchStr = [searchText stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+        NSMutableString * googlePlaceUrl=[NSMutableString stringWithFormat:@"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%f,%f&radius=50000&keyword=%@&key=%@",[[[NSUserDefaults standardUserDefaults]valueForKey:@"Latitude"] floatValue], [[[NSUserDefaults standardUserDefaults]valueForKey:@"Longitude"] floatValue],finalSearchStr,KgoogleApiKey];
         
         AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
         manager.responseSerializer = [AFHTTPResponseSerializer serializer];
@@ -235,6 +249,11 @@
             
             [cell.lblImage setImage:[UIImage imageWithContentsOfFile:getImagePath] forState:UIControlStateNormal];
         }
+        
+        
+       
+       
+        
 
         
         
@@ -258,7 +277,7 @@
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                        reuseIdentifier:MyIdentifier];
         }
-        cell.textLabel.text=[[responceArray valueForKey:@"vicinity"] objectAtIndex:indexPath.row];
+        cell.textLabel.text=[[responceArray valueForKey:@"name"] objectAtIndex:indexPath.row];
         return cell;
 
     }
@@ -271,7 +290,7 @@
     {
         
         btnAction.tag=indexPath.row;
-        search_Bar.text=[[responceArray valueForKey:@"vicinity"] objectAtIndex:indexPath.row];
+        search_Bar.text=[[responceArray valueForKey:@"name"] objectAtIndex:indexPath.row];
         btnAction.userInteractionEnabled=YES;
         btnAction.alpha=1.0;
         tblSearch.hidden=YES;
@@ -285,6 +304,9 @@
     }
     
 }
+
+
+
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -384,7 +406,7 @@
         longitude=[[[[responceArray valueForKey:@"geometry"] valueForKey:@"location"]valueForKey:@"lng"] objectAtIndex:sender.tag];
         
         NSString *query = [NSString stringWithFormat:@"insert into locationTbl(user_id,locationName,date,lat,long) values ('%@','%@','%@','%f','%f')",
-                           userId,[[responceArray valueForKey:@"vicinity"] objectAtIndex:sender.tag],[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"],[latitute floatValue],[longitude floatValue]];
+                           userId,[[responceArray valueForKey:@"name"] objectAtIndex:sender.tag],[[NSUserDefaults standardUserDefaults] valueForKey:@"selectDate"],[latitute floatValue],[longitude floatValue]];
         [database executeUpdate:query];
         
         NSString *sql = [NSString stringWithFormat:@"SELECT * FROM locationTbl where user_id='%@' and date='%@'",userId,selectDate];
@@ -437,8 +459,25 @@
         {
             UIImagePickerController * picker = [[UIImagePickerController alloc] init] ;
             picker.delegate = self;
-            picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            [self presentViewController:picker animated:YES completion:^{}];
+            
+            if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+            {
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    //your code
+                    
+                    UIPopoverController *popover = [[UIPopoverController alloc] initWithContentViewController:picker];
+                    [popover presentPopoverFromRect:CGRectMake(450.0f, 825.0f, 10.0f, 10.0f) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+                    self.popOver = popover;
+                }];
+                
+                
+                
+            } else
+            {
+                picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+                [self presentViewController:picker animated:YES completion:^{}];
+            }
+
         }
         default:
             // Do Nothing.........

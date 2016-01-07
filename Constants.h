@@ -27,34 +27,21 @@
 #define KgoogleApiKey        @"AIzaSyBewjXe0h5_3t1v9ycpf5RC9i_pAN6Mj8g"
 
 
-//expiry_param= Now=0 , Today=1 , This weakend=3 ,Anytime=4 ,Other=5
-typedef enum : NSUInteger
-{
-    Now=0,
-    Today,
-    Thisweakend,
-    Anytime,
-    Other,
-   
-    
-} expiry_param;
-
-#define HorizontalBarMode  0
-#define RingBarMode        1
-#define piechartBarMode    2
 
 
+#define IS_IPAD (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+#define IS_IPHONE (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+#define IS_RETINA ([[UIScreen mainScreen] scale] >= 2.0)
 
+#define SCREEN_WIDTH ([[UIScreen mainScreen] bounds].size.width)
+#define SCREEN_HEIGHT ([[UIScreen mainScreen] bounds].size.height)
+#define SCREEN_MAX_LENGTH (MAX(SCREEN_WIDTH, SCREEN_HEIGHT))
+#define SCREEN_MIN_LENGTH (MIN(SCREEN_WIDTH, SCREEN_HEIGHT))
 
-
-
-#define KBaseUrl               @"http://dev414.trigma.us/Buddy/webs/"
-
-#define Ksignup                @"registeruser?"
-
-
-#define KCloseAccount          @"delete_user?"
-#define KLogout                @"online?"
+#define IS_IPHONE_4_OR_LESS (IS_IPHONE && SCREEN_MAX_LENGTH < 568.0)
+#define IS_IPHONE_5 (IS_IPHONE && SCREEN_MAX_LENGTH == 568.0)
+#define IS_IPHONE_6 (IS_IPHONE && SCREEN_MAX_LENGTH == 667.0)
+#define IS_IPHONE_6P (IS_IPHONE && SCREEN_MAX_LENGTH == 736.0)
 
 
 
